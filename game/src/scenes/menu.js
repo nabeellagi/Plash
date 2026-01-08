@@ -1,18 +1,17 @@
 import { k } from "../core/kaplay";
 import { gsap } from "gsap";
 import { Btn1 } from "../ui/btn";
+import { transitionClose } from "../core/kaplay/sceneTransition";
 
-export function registerMenu(){
+export function registerMenu() {
     k.scene("menu", () => {
         // ===== SET BACKGROUND =====
-        k.setBackground(k.rgb(255,255,255))
-
         let bgSprite = null;
         const hour = new Date().getHours();
-        
-        if(hour >= 7 && hour < 18){
+
+        if (hour >= 7 && hour < 18) {
             bgSprite = "grass";
-        }else{
+        } else {
             bgSprite = "night";
         }
         const grassBg = k.add([
@@ -22,13 +21,13 @@ export function registerMenu(){
         ]);
         const bushBg = k.add([
             k.sprite("bush"),
-            k.pos(k.width()/2, k.height()/2 + 50),
+            k.pos(k.width() / 2, k.height() / 2 + 50),
             k.anchor("center"),
             k.scale(1),
         ]);
         gsap.to(bushBg.scale, {
-            x:1.02,
-            y:0.95,
+            x: 1.02,
+            y: 0.95,
             yoyo: true,
             repeat: -1,
             duration: 3,
@@ -42,22 +41,27 @@ export function registerMenu(){
         const logo = k.add([
             k.sprite("logo"),
             k.scale(0.4),
-            k.pos(k.width()/2 - 200, k.height()/2 - 10),
+            k.pos(k.width() / 2 - 200, k.height() / 2 - 10),
             k.anchor("center")
         ]);
 
         // ==== UI ====
         const startBtn = Btn1({
-            text : "Start",
-            pos : k.vec2(k.width()/2 + 200, k.height()/2 - 100)
+            text: "Start",
+            pos: k.vec2(k.width() / 2 + 200, k.height() / 2 - 100),
+            onClick: () => transitionClose("battle", {
+                direction: "left",
+                duration: 0.7
+            })
         });
+
         const tutorialBtn = Btn1({
-            text : "Tutorial",
-            pos : k.vec2(k.width()/2 + 200, k.height()/2)
+            text: "Tutorial",
+            pos: k.vec2(k.width() / 2 + 200, k.height() / 2)
         });
         const creditsBtn = Btn1({
-            text : "Credit",
-            pos : k.vec2(k.width()/2 + 200, k.height()/2 + 100)
+            text: "Credit",
+            pos: k.vec2(k.width() / 2 + 200, k.height() / 2 + 100)
         });
     });
 }
