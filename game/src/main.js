@@ -10,4 +10,5 @@ registerTutorial();
 
 registerBattle();
 
-k.go("menu");
+// k.go("menu");
+k.go("battle");

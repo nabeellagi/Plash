@@ -5,11 +5,14 @@ const IMAGES = {
     grass : 'bg/grass.png',
     bush : 'bg/bush.png',
     dry : 'bg/dry.png',
-    night: 'bg/night.png'
+    night: 'bg/night.png',
 };
 
 const SPRITES = {
-    btn1 : 'sprites/btn1.png'
+    btn1 : 'sprites/btn1.png',
+    ael : 'sprites/ael.png',
+    aelhurt : 'sprites/aelhurt.png',
+    aellow : 'sprites/aellow.png'
 };
 
 const FONTS = {
