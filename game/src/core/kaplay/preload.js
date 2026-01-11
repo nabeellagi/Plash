@@ -14,7 +14,9 @@ const SPRITES = {
     aelhurt : 'sprites/aelhurt.png',
     aellow : 'sprites/aellow.png',
     aelswing : 'sprites/aelswing.png',
+    nioobs : 'sprites/nioobs.png',
     bat : 'sprites/bat.png',
+    cleanbrick : 'sprites/cleanbrick.png',
 };
 
 const FONTS = {

@@ -1,13 +1,22 @@
 import gsap from "gsap";
 import { k } from "../core/kaplay";
 
+let altKeyListenerAdded = false;
+if (!altKeyListenerAdded) {
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Alt") {
+            e.preventDefault();
+        }
+    });
+    altKeyListenerAdded = true;
+}
+
 export function playerEntity({
     pos = k.center(),
     speed = 240,
     hp = 64,
     z
 } = {}) {
-    // k.debug.inspect = true;
     // ==== SETUP VAR ====
     let canMove = true;
     const TILT = {
@@ -42,6 +51,7 @@ export function playerEntity({
             setCanMove: (value) => { canMove = value; },
         },
     ]);
+
     // ==== SPRITE ====
     const sprite = root.add([
         k.sprite("ael"),
@@ -49,6 +59,7 @@ export function playerEntity({
         k.anchor("center"),
         k.z(1)
     ]);
+
     const hitBox = root.add([
         k.circle(34),
         k.anchor("center"),
@@ -71,6 +82,7 @@ export function playerEntity({
         k.rotate(0),
         k.scale(1)
     ]);
+
     const batSprite = batRoot.add([
         k.sprite("bat"),
         k.scale(BASE_SCALE * 1.7),
@@ -79,17 +91,15 @@ export function playerEntity({
         k.rotate(1),
         k.pos(-20, -10)
     ]);
+
     const batHitBox = batRoot.add([
         k.rect(70, 25),
-        // k.anchor("center"),
         k.opacity(0),
         k.pos(-60, -30),
         k.area(),
         k.rotate(-45),
         k.scale(1)
     ]);
-
-    // ==== HURT ==== 
 
     // ===== SWING BAT =====
     let isSwinging = false;
@@ -120,52 +130,58 @@ export function playerEntity({
             }
         });
     }
+
     // Input for swing
     k.onKeyPress("z", batSwing);
     k.onKeyPress("enter", batSwing);
-    // ON UPDATE
 
-    // Which key pressed the last will be the direction
+    // Which key pressed last will be the direction
     let lastVertical = 0;
     let lastHorizontal = 0;
 
     k.onKeyPress(["w", "up"], () => lastVertical = -1);
     k.onKeyPress(["s", "down"], () => lastVertical = 1);
-
     k.onKeyPress(["a", "left"], () => lastHorizontal = -1);
     k.onKeyPress(["d", "right"], () => lastHorizontal = 1);
 
     root.onUpdate(() => {
         // MOVE CHARACTER
         if (!canMove) return;
+
         let dir = k.vec2(0, 0);
-        if (
-            k.isKeyDown("w") || k.isKeyDown("up") ||
-            k.isKeyDown("s") || k.isKeyDown("down")
-        ) {
-            dir.y = lastVertical
+
+        const upPressed = k.isKeyDown("w") || k.isKeyDown("up");
+        const downPressed = k.isKeyDown("s") || k.isKeyDown("down");
+        const leftPressed = k.isKeyDown("a") || k.isKeyDown("left");
+        const rightPressed = k.isKeyDown("d") || k.isKeyDown("right");
+
+        // Vertical axis
+        if (upPressed || downPressed) {
+            dir.y = lastVertical;
         }
 
         // Horizontal axis
-        if (
-            k.isKeyDown("a") || k.isKeyDown("left") ||
-            k.isKeyDown("d") || k.isKeyDown("right")
-        ) {
-            dir.x = lastHorizontal
+        if (leftPressed || rightPressed) {
+            dir.x = lastHorizontal;
         }
 
+        // Apply movement
         if (dir.len() > 0) {
-            root.move(dir.unit().scale(speed));
-        };
+            const unitDir = dir.unit();
+            let moveSpeed = speed;
 
-        // SLOW DOWN
-        if (k.isKeyDown("shift")) {
-            root.move(dir.unit().scale(speed * -0.7));
+            // SLOW DOWN
+            if (k.isKeyDown("shift")) {
+                moveSpeed *= 0.3;
+            }
+            // RUN
+            else if (k.isKeyDown("space")) {
+                moveSpeed *= 1.45;
+            }
+
+            root.move(unitDir.scale(moveSpeed));
         }
-        // RUN
-        else if (k.isKeyDown("space")) {
-            root.move(dir.unit().scale(speed * 0.45));
-        }
+
         // TILT
         if (dir.x < 0) {
             // LEFT
@@ -173,15 +189,14 @@ export function playerEntity({
         } else if (dir.x > 0) {
             // RIGHT
             currentTilt = k.lerp(currentTilt, TILT.max_tilt, TILT.tilt_speed);
-        }
-        else {
+        } else {
             // RESET
             currentTilt = k.lerp(currentTilt, 0, TILT.reset_speed);
         }
         sprite.angle = currentTilt;
 
-        // === STRETCH ===
         if (dir.x !== 0 && dir.y !== 0) {
+            // DIAGONAL MOVEMENT
             sprite.scale.x = k.lerp(
                 sprite.scale.x,
                 BASE_SCALE * STRETCH.x_diag,
@@ -192,9 +207,7 @@ export function playerEntity({
                 BASE_SCALE * STRETCH.y_diag,
                 STRETCH.speed
             );
-        }
-        if (dir.x !== 0 || dir.y !== 0) {
-            // Moving horizontally
+        } else if (dir.x !== 0 || dir.y !== 0) {
             sprite.scale.x = k.lerp(
                 sprite.scale.x,
                 BASE_SCALE * STRETCH.x,
@@ -205,8 +218,7 @@ export function playerEntity({
                 BASE_SCALE * STRETCH.y,
                 STRETCH.speed
             );
-        }
-        else {
+        } else {
             sprite.scale.x = k.lerp(
                 sprite.scale.x,
                 BASE_SCALE,
@@ -219,20 +231,13 @@ export function playerEntity({
             );
         }
     });
+
     // BAT AIM
-    k.onKeyPress("control", () => {
+    k.onKeyPress("alt", () => {
         batFlipped = !batFlipped;
         batRoot.pos = batFlipped ? BAT_POS.flipped : BAT_POS.normal;
         batRoot.scale.x = batFlipped ? -1 : 1;
         batHitBox.angle = batFlipped ? 45 : -45;
-    });
-
-
-    // CTRL S BUG LOLL
-    window.addEventListener("keydown", (e) => {
-        if (e.key.toLocaleLowerCase() === "s" && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault();
-        }
     });
 
     return root;

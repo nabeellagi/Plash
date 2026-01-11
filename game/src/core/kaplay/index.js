@@ -5,7 +5,7 @@ export const k = kaplay({
     global: false,
     debug: true,
     crisp: true,
-    pixelDensity: 1.4,
+    pixelDensity: 1.15,
     width: 1250,
     height: 700
 });

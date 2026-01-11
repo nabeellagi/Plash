@@ -5,6 +5,7 @@ import { transitionClose } from "../core/kaplay/sceneTransition";
 
 export function registerMenu() {
     k.scene("menu", () => {
+        // k.debug.inspect = true;
         // ===== SET BACKGROUND =====
         let bgSprite = null;
         const hour = new Date().getHours();
