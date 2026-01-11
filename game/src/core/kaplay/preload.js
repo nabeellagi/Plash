@@ -12,7 +12,9 @@ const SPRITES = {
     btn1 : 'sprites/btn1.png',
     ael : 'sprites/ael.png',
     aelhurt : 'sprites/aelhurt.png',
-    aellow : 'sprites/aellow.png'
+    aellow : 'sprites/aellow.png',
+    aelswing : 'sprites/aelswing.png',
+    bat : 'sprites/bat.png',
 };
 
 const FONTS = {
