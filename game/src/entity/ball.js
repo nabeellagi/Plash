@@ -18,7 +18,7 @@ export function ballEntity({ pos = k.center(), z }) {
         k.z(z || 0),
         k.scale(1.2),
         k.rotate(0),
-        k.area({ shape: new k.Rect(k.vec2(0, 0), 64, 64) }),
+        k.area({ shape: new k.Rect(k.vec2(0, 0), 42, 42) }),
         "ball",
 
         {
@@ -33,6 +33,7 @@ export function ballEntity({ pos = k.center(), z }) {
     root.add([
         k.sprite("melonball"),
         k.anchor("center"),
+        k.scale(0.7)
     ])
 
     root.onUpdate(() => {

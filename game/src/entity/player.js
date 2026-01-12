@@ -47,6 +47,8 @@ export function playerEntity({
             damage: (amount) => {
                 root.hp -= amount;
             },
+            getHp : () => { return hp },
+
             canMove: () => canMove,
             setCanMove: (value) => { canMove = value; },
         },
@@ -194,6 +196,9 @@ export function playerEntity({
                 moveSpeed *= 1.45;
             }
             root.move(unitDir.scale(moveSpeed));
+
+            root.pos.x = k.clamp(root.pos.x, 0, k.width());
+            root.pos.y = k.clamp(root.pos.y, 0, k.height());
         }
 
         // TILT

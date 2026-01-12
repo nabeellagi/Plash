@@ -28,14 +28,16 @@ export function registerBattle() {
             z: Z_LAYER.bg,
             sprite: "cleanbrick",
         });
+        
         // Dark Overlay
         k.add([
             k.rect(k.width(), k.height()),
             k.pos(0, 0),
             k.color(k.rgb(0, 0, 0)),
             k.opacity(0.25),
-            k.z(Z_LAYER.overlay)
-        ])
+            k.z(Z_LAYER.overlay),
+            k.fixed()
+        ]);
 
         // ==== SET ENTITY ===
         const obs = observerEntity({
@@ -61,11 +63,12 @@ export function registerBattle() {
         k.onUpdate(() => {
             camTarget.pos = camTarget.pos.lerp(player.pos, CAM_FOLLOW_LERP)
             k.camPos(camTarget.pos)
-
             currentZoom = k.lerp(currentZoom, targetZoom, CAM_ZOOM_LERP)
             k.camScale(currentZoom)
-        })
+        });
 
+        // SET HP BAR
+        const maxHP = player.getHp();
 
         // ===== EYE UPDATE =====
         const MAX_OFFSET = 7.5;     // how far eyes can move
