@@ -17,6 +17,9 @@ const SPRITES = {
     nioobs : 'sprites/nioobs.png',
     bat : 'sprites/bat.png',
     cleanbrick : 'sprites/cleanbrick.png',
+    glass: 'sprites/glass.png',
+    melonball: 'sprites/melonball.png',
+    chamber: 'sprites/chamber.png',
 };
 
 const FONTS = {

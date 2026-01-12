@@ -15,7 +15,9 @@ export function playerEntity({
     pos = k.center(),
     speed = 240,
     hp = 64,
-    z
+    z,
+    ball,
+    // onBallCollide = () => { }
 } = {}) {
     // ==== SETUP VAR ====
     let canMove = true;
@@ -32,7 +34,6 @@ export function playerEntity({
         speed: 0.15,
         reset: 0.2
     };
-
     const BASE_SCALE = 0.045;
     let currentTilt = 0;
 
@@ -46,7 +47,6 @@ export function playerEntity({
             damage: (amount) => {
                 root.hp -= amount;
             },
-
             canMove: () => canMove,
             setCanMove: (value) => { canMove = value; },
         },
@@ -65,8 +65,10 @@ export function playerEntity({
         k.anchor("center"),
         k.opacity(0),
         k.pos(0, 12),
-        k.area({ shape: new k.Rect(k.vec2(0, 0), 58, 52) })
-    ])
+        k.area({ shape: new k.Rect(k.vec2(0, 0), 58, 52) }),
+        k.body({ isStatic : true }),
+        k.scale(1)
+    ]);
 
     // ==== BAT WEAPON ====
     let batFlipped = false;
@@ -79,7 +81,7 @@ export function playerEntity({
         k.anchor("center"),
         k.pos(-25, -10),
         k.z(sprite.z - 1),
-        k.rotate(0),
+        k.rotate(-20),
         k.scale(1)
     ]);
 
@@ -98,18 +100,19 @@ export function playerEntity({
         k.pos(-60, -30),
         k.area(),
         k.rotate(-45),
-        k.scale(1)
+        k.scale(1),
+        k.body({ isStatic : true }),
+        "batHitBox" // Add tag for collision detection
     ]);
 
     // ===== SWING BAT =====
     let isSwinging = false;
+
     const batSwing = () => {
         if (isSwinging) return;
         isSwinging = true;
-
         sprite.use(k.sprite("aelswing"));
         sprite.scale.y = BASE_SCALE * 1.5;
-
         let initialAngle = batRoot.angle;
 
         // SWING ANIMATION
@@ -129,11 +132,25 @@ export function playerEntity({
                 });
             }
         });
-    }
+    };
 
     // Input for swing
     k.onKeyPress("z", batSwing);
     k.onKeyPress("enter", batSwing);
+
+    // ==== BAT HIT DETECTION ====
+    batHitBox.onCollide("ball", () => {
+        if (!isSwinging) return
+
+        const dir = batFlipped
+            ? k.vec2(1, -0.35)
+            : k.vec2(-1, -0.35)
+
+        ball.hit(dir, 2000);
+        k.shake(15);
+        console.log("ball")
+    })
+
 
     // Which key pressed last will be the direction
     let lastVertical = 0;
@@ -149,7 +166,6 @@ export function playerEntity({
         if (!canMove) return;
 
         let dir = k.vec2(0, 0);
-
         const upPressed = k.isKeyDown("w") || k.isKeyDown("up");
         const downPressed = k.isKeyDown("s") || k.isKeyDown("down");
         const leftPressed = k.isKeyDown("a") || k.isKeyDown("left");
@@ -159,7 +175,6 @@ export function playerEntity({
         if (upPressed || downPressed) {
             dir.y = lastVertical;
         }
-
         // Horizontal axis
         if (leftPressed || rightPressed) {
             dir.x = lastHorizontal;
@@ -178,7 +193,6 @@ export function playerEntity({
             else if (k.isKeyDown("space")) {
                 moveSpeed *= 1.45;
             }
-
             root.move(unitDir.scale(moveSpeed));
         }
 
@@ -207,6 +221,17 @@ export function playerEntity({
                 BASE_SCALE * STRETCH.y_diag,
                 STRETCH.speed
             );
+            // RESIZE HIT BOX
+            hitBox.scale.x = k.lerp(
+                hitBox.scale.x,
+                STRETCH.x_diag,
+                STRETCH.speed
+            );
+            hitBox.scale.y = k.lerp(
+                hitBox.scale.y,
+                STRETCH.y_diag,
+                STRETCH.speed
+            );
         } else if (dir.x !== 0 || dir.y !== 0) {
             sprite.scale.x = k.lerp(
                 sprite.scale.x,
@@ -227,6 +252,16 @@ export function playerEntity({
             sprite.scale.y = k.lerp(
                 sprite.scale.y,
                 BASE_SCALE,
+                STRETCH.reset
+            );
+            hitBox.scale.x = k.lerp(
+                hitBox.scale.x,
+                1,
+                STRETCH.reset
+            );
+            hitBox.scale.y = k.lerp(
+                hitBox.scale.y,
+                1,
                 STRETCH.reset
             );
         }

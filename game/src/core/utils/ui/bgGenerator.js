@@ -6,17 +6,20 @@ export function bgGenerator({
     scale = 1,
     sprite,
     z = -10,
+    pos = k.vec2(0, 0),
+    width = k.width(),
+    height = k.height(),
 } = {}) {
 
     const w = tileWidth * scale;
     const h = tileHeight * scale;
 
-    const cols = Math.ceil(k.width() / w);
-    const rows = Math.ceil(k.height() / h);
+    const cols = Math.ceil(width / w);
+    const rows = Math.ceil(height / h);
 
     const root = k.add([
-        k.pos(0, 0),
-        k.anchor("topleft"),
+        k.pos(pos),
+        k.anchor("top"),
         k.z(z),
         k.fixed(),
         {

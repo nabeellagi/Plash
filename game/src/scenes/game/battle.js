@@ -1,6 +1,7 @@
 import { k } from "../../core/kaplay";
 import { revealIfNeeded } from "../../core/kaplay/sceneTransition";
 import { bgGenerator } from "../../core/utils/ui/bgGenerator";
+import { ballEntity } from "../../entity/ball";
 import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
 
@@ -8,42 +9,65 @@ export function registerBattle() {
     k.scene("battle", () => {
 
         // Debug
-        k.debug.inspect = true;
+        // k.debug.inspect = true;
+
+        // LAYERING
+        const Z_LAYER = {
+            bg: 1,
+            overlay: 3,
+            player: 5,
+            obs: 2,
+        };
 
         // ==== TRANSITION ====
         revealIfNeeded();
+        // BRICK
         bgGenerator({
             tileWidth: 64,
             tileHeight: 64,
-            z: -10,
-            sprite : "cleanbrick",
-        })
-        
-        // LAYERING
-        const Z_LAYER = {
-            player: 5,
-            obs: 3,
-        };
-
-        // ==== SET ENTITY ====
-        const player = playerEntity({
-            z: Z_LAYER.player
+            z: Z_LAYER.bg,
+            sprite: "cleanbrick",
         });
+        // Dark Overlay
+        k.add([
+            k.rect(k.width(), k.height()),
+            k.pos(0, 0),
+            k.color(k.rgb(0, 0, 0)),
+            k.opacity(0.25),
+            k.z(Z_LAYER.overlay)
+        ])
+
+        // ==== SET ENTITY ===
         const obs = observerEntity({
             z: Z_LAYER.obs
         });
+        const ball = ballEntity({
+            z: Z_LAYER.player + 1
+        });
+        const player = playerEntity({
+            z: Z_LAYER.player,
+            ball: ball
+        });
 
+        // ==== SET CAM ====
+        const camTarget = k.add([
+            k.pos(player.pos)
+        ]);
+        const CAM_FOLLOW_LERP = 0.08;
+        const CAM_ZOOM_LERP = 0.06;
+        let targetZoom = 1.15
+        let currentZoom = 1.15
         // ==== CAM UPDATE ====
-        player.onUpdate(() => {
-            const cam = k.camPos();
-            const playerPos = player.pos;
-            k.camPos(k.vec2(
-                k.lerp(cam.x, playerPos.x, 0.1),
-                k.lerp(cam.y, playerPos.y, 0.1)
-            ));
+        k.onUpdate(() => {
+            camTarget.pos = camTarget.pos.lerp(player.pos, CAM_FOLLOW_LERP)
+            k.camPos(camTarget.pos)
+
+            currentZoom = k.lerp(currentZoom, targetZoom, CAM_ZOOM_LERP)
+            k.camScale(currentZoom)
         })
 
-        // ===== UPDATE =====
+
+        // ===== EYE UPDATE =====
         const MAX_OFFSET = 7.5;     // how far eyes can move
         const FOLLOW_SPEED = 0.2; // smoothing factor
         k.onUpdate(() => {

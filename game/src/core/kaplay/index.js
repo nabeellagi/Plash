@@ -7,6 +7,7 @@ export const k = kaplay({
     crisp: true,
     pixelDensity: 1.15,
     width: 1250,
-    height: 700
+    height: 700,
+    maxFPS: 60,
 });
 preloadAll();
