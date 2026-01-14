@@ -1,6 +1,7 @@
 import { k } from "../../core/kaplay";
 import { revealIfNeeded } from "../../core/kaplay/sceneTransition";
 import { bgGenerator } from "../../core/utils/ui/bgGenerator";
+import { hpBarUI } from "../../core/utils/ui/hpBar";
 import { ballEntity } from "../../entity/ball";
 import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
@@ -17,10 +18,21 @@ export function registerBattle() {
             overlay: 3,
             player: 5,
             obs: 2,
+            hpBar : 6
         };
+
+        // PLAYER BOUND
+        const BOUND_PADDING = {
+            left: -80,
+            right: 140,
+            top: -50,
+            bottom: 40
+        }
 
         // ==== TRANSITION ====
         revealIfNeeded();
+        
+        // ==== BACKGROUND ====
         // BRICK
         bgGenerator({
             tileWidth: 64,
@@ -29,14 +41,13 @@ export function registerBattle() {
             sprite: "cleanbrick",
         });
         
-        // Dark Overlay
+        // MAP
         k.add([
-            k.rect(k.width(), k.height()),
-            k.pos(0, 0),
-            k.color(k.rgb(0, 0, 0)),
-            k.opacity(0.25),
+            k.sprite("map1"),
             k.z(Z_LAYER.overlay),
-            k.fixed()
+            k.scale(1.2),
+            k.anchor("center"),
+            k.pos(k.width() / 2, k.height() / 2),
         ]);
 
         // ==== SET ENTITY ===
@@ -44,11 +55,14 @@ export function registerBattle() {
             z: Z_LAYER.obs
         });
         const ball = ballEntity({
-            z: Z_LAYER.player + 1
+            z: Z_LAYER.player + 1,
+            boundPadding: BOUND_PADDING
         });
+        
         const player = playerEntity({
             z: Z_LAYER.player,
-            ball: ball
+            ball: ball, 
+            boundPadding : BOUND_PADDING
         });
 
         // ==== SET CAM ====
@@ -57,8 +71,9 @@ export function registerBattle() {
         ]);
         const CAM_FOLLOW_LERP = 0.08;
         const CAM_ZOOM_LERP = 0.06;
-        let targetZoom = 1.15
-        let currentZoom = 1.15
+        const INIT_TARGET_ZOOM = 1.3;
+        let targetZoom = INIT_TARGET_ZOOM;
+        let currentZoom = 5
         // ==== CAM UPDATE ====
         k.onUpdate(() => {
             camTarget.pos = camTarget.pos.lerp(player.pos, CAM_FOLLOW_LERP)
@@ -66,9 +81,32 @@ export function registerBattle() {
             currentZoom = k.lerp(currentZoom, targetZoom, CAM_ZOOM_LERP)
             k.camScale(currentZoom)
         });
+        // ==== ZOOM OUT ====
+        k.onKeyDown("-", () => {
+            targetZoom = k.clamp(targetZoom - 0.1, 0.5, 2);
+        });
+        // ===== ZOOM IN =====
+        k.onKeyDown("=", () => {
+            targetZoom = k.clamp(targetZoom + 0.1, 0.5, 5);
+        });
+        k.onKeyDown("+", () => {
+            targetZoom = k.clamp(targetZoom + 0.1, 0.5, 5);
+        });
+        // ===== RESET ZOOM =====
+        k.onKeyDown("0", () => {
+            targetZoom = INIT_TARGET_ZOOM;
+        });
 
         // SET HP BAR
         const maxHP = player.getHp();
+        let currentHP = player.getHp();
+
+        const hpBar = hpBarUI({
+            maxHP,
+            currentHP,
+            z: Z_LAYER.hpBar,
+            width: 210
+        });
 
         // ===== EYE UPDATE =====
         const MAX_OFFSET = 7.5;     // how far eyes can move

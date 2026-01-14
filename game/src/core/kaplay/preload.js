@@ -6,6 +6,7 @@ const IMAGES = {
     bush : 'bg/bush.png',
     dry : 'bg/dry.png',
     night: 'bg/night.png',
+    map1: 'bg/map1.png'
 };
 
 const SPRITES = {

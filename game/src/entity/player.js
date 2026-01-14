@@ -17,6 +17,8 @@ export function playerEntity({
     hp = 64,
     z,
     ball,
+    hitPower = 1500,
+    boundPadding,
     // onBallCollide = () => { }
 } = {}) {
     // ==== SETUP VAR ====
@@ -47,7 +49,9 @@ export function playerEntity({
             damage: (amount) => {
                 root.hp -= amount;
             },
-            getHp : () => { return hp },
+            getHp: () => { return hp },
+
+            getNumHit: () => { return numHit},
 
             canMove: () => canMove,
             setCanMove: (value) => { canMove = value; },
@@ -68,7 +72,7 @@ export function playerEntity({
         k.opacity(0),
         k.pos(0, 12),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 58, 52) }),
-        k.body({ isStatic : true }),
+        k.body({ isStatic: true }),
         k.scale(1)
     ]);
 
@@ -103,7 +107,7 @@ export function playerEntity({
         k.area(),
         k.rotate(-45),
         k.scale(1),
-        k.body({ isStatic : true }),
+        k.body({ isStatic: true }),
         "batHitBox" // Add tag for collision detection
     ]);
 
@@ -141,18 +145,26 @@ export function playerEntity({
     k.onKeyPress("enter", batSwing);
 
     // ==== BAT HIT DETECTION ====
-    batHitBox.onCollide("ball", () => {
+    let currentPower = hitPower;
+    let addPower = 10;
+    let numHit = 0;
+
+    batHitBox.onCollide("ball", (b) => {
         if (!isSwinging) return
 
         const dir = batFlipped
             ? k.vec2(1, -0.35)
             : k.vec2(-1, -0.35)
+        k.shake(3);
 
-        ball.hit(dir, 2000);
-        k.shake(15);
-        console.log("ball")
-    })
-
+        b.hit(dir, currentPower)
+        numHit++;
+        
+        // Add power
+        if(numHit % 10 === 0){
+            currentPower += addPower;
+        }
+    });
 
     // Which key pressed last will be the direction
     let lastVertical = 0;
@@ -197,8 +209,8 @@ export function playerEntity({
             }
             root.move(unitDir.scale(moveSpeed));
 
-            root.pos.x = k.clamp(root.pos.x, 0, k.width());
-            root.pos.y = k.clamp(root.pos.y, 0, k.height());
+            root.pos.x = k.clamp(root.pos.x, boundPadding.left, k.width() + boundPadding.right);
+            root.pos.y = k.clamp(root.pos.y, boundPadding.top, k.height() + boundPadding.bottom);
         }
 
         // TILT
@@ -246,6 +258,16 @@ export function playerEntity({
             sprite.scale.y = k.lerp(
                 sprite.scale.y,
                 BASE_SCALE * STRETCH.y,
+                STRETCH.speed
+            );
+            hitBox.scale.x = k.lerp(
+                hitBox.scale.x,
+                STRETCH.x,
+                STRETCH.speed
+            );
+            hitBox.scale.y = k.lerp(
+                hitBox.scale.y,
+                STRETCH.y,
                 STRETCH.speed
             );
         } else {
