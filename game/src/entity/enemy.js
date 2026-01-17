@@ -7,7 +7,7 @@ export function enemyEntity({
     speed,
     damage,
     hp,
-
+    scale = 1,
     z = 0,
     ai
 }) {
@@ -52,7 +52,7 @@ export function enemyEntity({
         k.sprite(sprite),
         k.scale(1),
         k.anchor("center"),
-        k.opacity(1),
+        k.scale(scale),
         k.color(),
     ])
 
@@ -99,7 +99,9 @@ export function enemyEntity({
     root.onCollide("player", (p) => {
         if (isDead || isInvincible) return
         p.damage(damage)
+        k.shake(7);
         blink();
+
         k.wait(0.25, () => {
             die()
         })
@@ -107,7 +109,8 @@ export function enemyEntity({
 
     // ===== BALL COLLISION =====
     root.onCollide("ball", (b) => {
-        if (!b.isActive()) return 
+        if (!b.isActive()) return
+        k.shake(3); 
         root.takeHit()
     })
 

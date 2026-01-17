@@ -8,13 +8,13 @@ import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
 import { enemyEntity } from "../../entity/enemy";
 import { ENEMY_DATA } from "../../core/data/enemyData";
-import { smoothChase } from "../../core/utils/ai";
+import { guardChase, smoothChase, zigzagChase } from "../../core/utils/ai";
 
 export function registerBattle() {
     k.scene("battle", () => {
 
         // Debug
-        k.debug.inspect = true;
+        // k.debug.inspect = true;
 
         // ===== SET UP CONSTS AND VARS =====
         let gameState = "countdown";
@@ -80,15 +80,15 @@ export function registerBattle() {
         });
 
         // ENEMY TEST
-        const enemy = enemyEntity({
-            sprite: ENEMY_DATA.enemy1.sprite,
-            speed: ENEMY_DATA.enemy1.speed,
-            damage: ENEMY_DATA.enemy1.damage,
-            hp: ENEMY_DATA.enemy1.hp,
-
-            ai : smoothChase(player, ENEMY_DATA.enemy1.speed),
+        const enemyTest = enemyEntity({
+            sprite: ENEMY_DATA.corn.sprite,
+            scale: ENEMY_DATA.corn.scale,
             z: Z_LAYER.player,
-            pos: k.vec2(0,0)
+            hp: ENEMY_DATA.corn.hp,
+            damage: ENEMY_DATA.corn.damage,
+            ai: ENEMY_DATA.corn.ai(player),
+            scale: ENEMY_DATA.corn.scale,
+            pos: k.vec2(4, 4)
         })
 
         // ==== COUNTDOWN ====
@@ -175,7 +175,7 @@ export function registerBattle() {
         });
         // ==== ZOOM OUT ====
         k.onKeyDown("-", () => {
-            targetZoom = k.clamp(targetZoom - 0.1, 0.5, 2);
+            targetZoom = k.clamp(targetZoom - 0.1, 0.8, 3);
         });
         // ===== ZOOM IN =====
         k.onKeyDown("=", () => {

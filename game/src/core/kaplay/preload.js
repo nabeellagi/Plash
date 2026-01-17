@@ -21,7 +21,8 @@ const SPRITES = {
     glass: 'sprites/glass.png',
     melonball: 'sprites/melonball.png',
     chamber: 'sprites/chamber.png',
-    onion: 'sprites/onion.png'
+    onion: 'sprites/onion.png',
+    corn: 'sprites/corn.png'
 };
 
 const FONTS = {
