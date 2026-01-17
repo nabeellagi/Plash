@@ -8,6 +8,8 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
     let speed = 0
     let spin = 0
 
+    let isActive = false;
+
     const DECELERATION = 500
     const MIN_SPEED = 5
     const SIZE = 32
@@ -25,7 +27,13 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
             hit(dir, power) {
                 direction = dir.unit()
                 speed = power
-                spin = k.clamp(dir.x * 40, -80, 80)
+                spin = k.clamp(dir.x * 40, -80, 80);
+
+                isActive = true;
+            },
+
+            isActive(){
+                return isActive;
             }
         }
     ])
@@ -40,6 +48,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         const dt = k.dt()
         if (speed <= MIN_SPEED) {
             speed = 0
+            isActive = false;
             return
         }
 

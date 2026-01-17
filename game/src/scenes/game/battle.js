@@ -1,24 +1,30 @@
+import gsap from "gsap";
 import { k } from "../../core/kaplay";
 import { revealIfNeeded } from "../../core/kaplay/sceneTransition";
 import { bgGenerator } from "../../core/utils/ui/bgGenerator";
-import { hpBarUI } from "../../core/utils/ui/hpBar";
+import { hpBarUI } from "../../ui/hpBar";
 import { ballEntity } from "../../entity/ball";
 import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
+import { enemyEntity } from "../../entity/enemy";
+import { ENEMY_DATA } from "../../core/data/enemyData";
+import { smoothChase } from "../../core/utils/ai";
 
 export function registerBattle() {
     k.scene("battle", () => {
 
         // Debug
-        // k.debug.inspect = true;
+        k.debug.inspect = true;
 
+        // ===== SET UP CONSTS AND VARS =====
+        let gameState = "countdown";
         // LAYERING
         const Z_LAYER = {
             bg: 1,
             overlay: 3,
             player: 5,
             obs: 2,
-            hpBar : 6
+            hpBar: 6
         };
 
         // PLAYER BOUND
@@ -27,11 +33,13 @@ export function registerBattle() {
             right: 140,
             top: -50,
             bottom: 40
-        }
+        };
+
+        let canMove = false;
 
         // ==== TRANSITION ====
         revealIfNeeded();
-        
+
         // ==== BACKGROUND ====
         // BRICK
         bgGenerator({
@@ -40,7 +48,7 @@ export function registerBattle() {
             z: Z_LAYER.bg,
             sprite: "cleanbrick",
         });
-        
+
         // MAP
         k.add([
             k.sprite("map1"),
@@ -58,12 +66,96 @@ export function registerBattle() {
             z: Z_LAYER.player + 1,
             boundPadding: BOUND_PADDING
         });
-        
+
         const player = playerEntity({
             z: Z_LAYER.player,
-            ball: ball, 
-            boundPadding : BOUND_PADDING
+            ball: ball,
+            boundPadding: BOUND_PADDING,
+            canMove: canMove
         });
+        player.setCanMove(false);
+        // SET HP
+        player.on("hpChanged", (newHp) => {
+            hpBar.setHp(newHp);
+        });
+
+        // ENEMY TEST
+        const enemy = enemyEntity({
+            sprite: ENEMY_DATA.enemy1.sprite,
+            speed: ENEMY_DATA.enemy1.speed,
+            damage: ENEMY_DATA.enemy1.damage,
+            hp: ENEMY_DATA.enemy1.hp,
+
+            ai : smoothChase(player, ENEMY_DATA.enemy1.speed),
+            z: Z_LAYER.player,
+            pos: k.vec2(0,0)
+        })
+
+        // ==== COUNTDOWN ====
+        const countdownText = k.add([
+            k.text("3", {
+                font: "Glad",
+                size: 96,
+            }),
+            k.anchor("center"),
+            k.color("9929EA"),
+            k.pos(k.width() / 2, k.height() / 2),
+            k.z(100),
+            k.fixed(),
+            k.opacity(0),
+            k.scale(0.5),
+        ]);
+        const runCountdown = () => {
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    countdownText.destroy();
+                    gameState = "playing";
+                    player.setCanMove(true);
+                }
+            });
+
+            const showNumber = (text) => {
+                tl.set(countdownText, { opacity: 1 })
+                    .set(countdownText.scale, { x: 0.5, y: 0.5 })
+                    .call(() => countdownText.text = text)
+                    .to(countdownText.scale, {
+                        x: 1.2,
+                        y: 1.2,
+                        duration: 0.4,
+                        ease: "back.out(3)"
+                    })
+                    .to(countdownText, {
+                        opacity: 0,
+                        duration: 0.3,
+                        ease: "power2.in"
+                    }, "+=0.2")
+            };
+
+            showNumber("3");
+            showNumber("2");
+            showNumber("1");
+
+            // START
+            tl.set(countdownText, { opacity: 1 })
+                .set(countdownText.scale, { x: 0.7, y: 0.7 })
+                .call(() => countdownText.text = "START")
+                .to(countdownText.scale, {
+                    x: 1.4,
+                    y: 1.4,
+                    duration: 0.5,
+                    ease: "expo.out"
+                })
+                .to(countdownText, {
+                    opacity: 0,
+                    duration: 0.4
+                });
+        }
+        runCountdown();
+
+        // test damaage
+        // k.onKeyPress("h", () => {
+        //     player.damage(10);
+        // });
 
         // ==== SET CAM ====
         const camTarget = k.add([

@@ -16,13 +16,12 @@ export function playerEntity({
     speed = 240,
     hp = 64,
     z,
-    ball,
+    canMove,
     hitPower = 1500,
     boundPadding,
     // onBallCollide = () => { }
 } = {}) {
     // ==== SETUP VAR ====
-    let canMove = true;
     const TILT = {
         max_tilt: 12,
         tilt_speed: 0.1,
@@ -39,21 +38,24 @@ export function playerEntity({
     const BASE_SCALE = 0.045;
     let currentTilt = 0;
 
+    let isInvincible = false;
+    const HIT_COOLDOWN = 0.6;
+
     // ==== SET ROOT =====
     const root = k.add([
         k.anchor("center"),
         k.pos(pos),
         k.z(z || 0),
+        "player",
         {
             hp: hp,
             damage: (amount) => {
                 root.hp -= amount;
             },
-            getHp: () => { return hp },
+            getHp: () => root.hp,
 
-            getNumHit: () => { return numHit},
+            getNumHit: () => { return numHit },
 
-            canMove: () => canMove,
             setCanMove: (value) => { canMove = value; },
         },
     ]);
@@ -63,7 +65,9 @@ export function playerEntity({
         k.sprite("ael"),
         k.scale(BASE_SCALE),
         k.anchor("center"),
-        k.z(1)
+        k.z(1),
+        k.opacity(1),
+        k.color()
     ]);
 
     const hitBox = root.add([
@@ -73,7 +77,43 @@ export function playerEntity({
         k.pos(0, 12),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 58, 52) }),
         k.body({ isStatic: true }),
-        k.scale(1)
+        k.scale(1),
+        "player",
+
+        {
+            damage: (amount) => {
+                if (isInvincible) return;
+
+                root.hp = k.clamp(root.hp - amount, 0, hp);
+                isInvincible = true;
+                sprite.color = k.rgb(255, 100, 100);
+
+                // Blink
+                gsap.fromTo(sprite, {
+                    opacity: 0.6
+                }, {
+                    opacity: 0.1,
+                    duration: 0.1,
+                    repeat: 7,
+                    yoyo: true,
+                    ease: "power1.inOut",
+                    onComplete: () => {
+                        k.wait(HIT_COOLDOWN, () => {
+                            isInvincible = false;
+                            sprite.opacity = 1;
+                            sprite.color = k.rgb(255, 255, 255);
+                        });
+                    }
+                });
+                root.trigger("hpChanged", root.hp);
+                k.shake(6);
+
+                // ==== DEATH CASE ====
+                if (root.hp <= 0) {
+                    root.trigger("dead");
+                }
+            }
+        }
     ]);
 
     // ==== BAT WEAPON ====
@@ -159,9 +199,9 @@ export function playerEntity({
 
         b.hit(dir, currentPower)
         numHit++;
-        
+
         // Add power
-        if(numHit % 10 === 0){
+        if (numHit % 10 === 0) {
             currentPower += addPower;
         }
     });
