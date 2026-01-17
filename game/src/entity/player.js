@@ -49,10 +49,33 @@ export function playerEntity({
         "player",
         {
             hp: hp,
+            maxHp: hp,
             damage: (amount) => {
                 root.hp -= amount;
+                console.log("ouch")
             },
             getHp: () => root.hp,
+            getMaxHp: () => root.maxHp,
+
+            // playerEntity
+            setHp(value) {
+                root.hp = k.clamp(value, 0, root.maxHp)
+                root.trigger("hpChanged", root.hp, root.maxHp)
+            },
+
+            setMaxHp(value, refill = true) {
+                root.maxHp = value
+                if (refill) root.hp = value
+                root.trigger("hpChanged", root.hp, root.maxHp)
+            },
+
+            refillHp() {
+                root.hp = root.maxHp
+                root.trigger("hpChanged", root.hp, root.maxHp)
+            },
+            resetInvincibility() {
+                isInvincible = false
+            },
 
             getNumHit: () => { return numHit },
 
@@ -87,7 +110,7 @@ export function playerEntity({
                 root.hp = k.clamp(root.hp - amount, 0, hp);
                 isInvincible = true;
                 sprite.color = k.rgb(255, 100, 100);
-
+                console.log("damage")
                 // Blink
                 gsap.fromTo(sprite, {
                     opacity: 0.6
@@ -105,7 +128,8 @@ export function playerEntity({
                         });
                     }
                 });
-                root.trigger("hpChanged", root.hp);
+                root.trigger("hpChanged", root.hp, root.maxHp);
+
                 k.shake(6);
 
                 // ==== DEATH CASE ====

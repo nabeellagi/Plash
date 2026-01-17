@@ -20,6 +20,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         k.z(z || 0),
         k.scale(1.2),
         k.rotate(0),
+        k.body({ isStatic : true }),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 50, 50) }),
         "ball",
 
@@ -61,7 +62,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         if (root.pos.x < SIZE + boundPadding.left) {
             root.pos.x = SIZE + boundPadding.left
             direction = reflect(direction, k.vec2(1, 0))
-            direction = jitterDirection(direction, 8);
+            direction = jitterDirection(direction, 2);
             spin += direction.y * 25
         }
 
@@ -69,7 +70,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         if (root.pos.x > k.width() + boundPadding.right) {
             root.pos.x = k.width() + boundPadding.right
             direction = reflect(direction, k.vec2(-1, 0))
-            direction = jitterDirection(direction, 8);
+            direction = jitterDirection(direction, 2);
             spin += direction.y * 25
         }
 
@@ -77,7 +78,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         if (root.pos.y < SIZE + boundPadding.top) {
             root.pos.y = SIZE + boundPadding.top
             direction = reflect(direction, k.vec2(0, 1));
-            direction = jitterDirection(direction, 8);
+            direction = jitterDirection(direction, 2);
             spin += direction.x * 25
         }
 
@@ -85,7 +86,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         if (root.pos.y > k.height() - (SIZE + boundPadding.bottom)) {
             root.pos.y = k.height() - (SIZE + boundPadding.bottom)
             direction = reflect(direction, k.vec2(0, -1));
-            direction = jitterDirection(direction, 8);
+            direction = jitterDirection(direction, 2);
             spin += direction.x * 25
         }
 

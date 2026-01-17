@@ -8,13 +8,13 @@ import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
 import { enemyEntity } from "../../entity/enemy";
 import { ENEMY_DATA } from "../../core/data/enemyData";
-import { guardChase, smoothChase, zigzagChase } from "../../core/utils/ai";
+import { createWaveManager } from "../../core/utils/waveManager";
 
 export function registerBattle() {
     k.scene("battle", () => {
 
         // Debug
-        // k.debug.inspect = true;
+        k.debug.inspect = true;
 
         // ===== SET UP CONSTS AND VARS =====
         let enemyList = []; // store enemy entity
@@ -75,22 +75,6 @@ export function registerBattle() {
             canMove: canMove
         });
         player.setCanMove(false);
-        // SET HP
-        player.on("hpChanged", (newHp) => {
-            hpBar.setHp(newHp);
-        });
-
-        // ENEMY TEST
-        const enemyTest = enemyEntity({
-            sprite: ENEMY_DATA.radish.sprite,
-            scale: ENEMY_DATA.radish.scale,
-            z: Z_LAYER.player,
-            hp: ENEMY_DATA.radish.hp,
-            damage: ENEMY_DATA.radish.damage,
-            ai: ENEMY_DATA.radish.ai(player),
-            scale: ENEMY_DATA.radish.scale,
-            pos: k.vec2(4, 4)
-        })
 
         // ==== COUNTDOWN ====
         const countdownText = k.add([
@@ -112,6 +96,8 @@ export function registerBattle() {
                     countdownText.destroy();
                     gameState = "playing";
                     player.setCanMove(true);
+
+                    waveManager.start();
                 }
             });
 
@@ -210,6 +196,12 @@ export function registerBattle() {
             width: 210
         });
 
+        // SET HP
+        player.on("hpChanged", (hp, maxHp) => {
+            hpBar.setMaxHp(maxHp)
+            hpBar.setHp(hp)
+        });
+
         // ===== EYE UPDATE =====
         const MAX_OFFSET = 7.5;     // how far eyes can move
         const FOLLOW_SPEED = 0.2; // smoothing factor
@@ -230,6 +222,20 @@ export function registerBattle() {
                 eye.pos.x = k.lerp(eye.pos.x, targetPos.x, FOLLOW_SPEED);
                 eye.pos.y = k.lerp(eye.pos.y, targetPos.y, FOLLOW_SPEED);
             });
+        });
+
+
+        const waveManager = createWaveManager({
+            player,
+            hpBar,
+            z: Z_LAYER.player,
+            spawnBounds: {
+                left: -50,
+                right: k.width() + 50,
+                top: -50,
+                bottom: k.height() + 50
+            }
         })
+
     })
 };

@@ -12,14 +12,17 @@ export function hpBarUI({
         k.anchor("center"),
         k.pos(k.width() / 2 - width / 2, k.height() - 100),
         k.z(z),
-        k.fixed(), {
-            setHp: (newHp) => { setHp(newHp) }
+        k.fixed(),
+        {
+            setHp: (newHp) => setHp(newHp),
+            setMaxHp: (newMax) => setMaxHp(newMax),
         }
     ]);
 
     // SET HP UI
     const height = 32;
-    const currentWidth = (currentHP / maxHP) * width;
+    const safeMax = Math.max(1, maxHP);
+    const currentWidth = (currentHP / safeMax) * width;
 
     const bgBar = root.add([
         k.rect(width, height, { radius: 5 }),
@@ -50,7 +53,7 @@ export function hpBarUI({
         x: 1.2,
         y: 1.15,
         duration: 1,
-        
+
         yoyo: true,
         repeat: -1,
         ease: "sine.inOut"
@@ -67,6 +70,12 @@ export function hpBarUI({
         });
         hpText.text = `${currentHP}/${maxHP}`;
     };
+
+    const setMaxHp = (newMax) => {
+        maxHP = newMax
+        currentHP = k.clamp(currentHP, 0, maxHP)
+        setHp(currentHP)
+    }
 
     return root;
 }

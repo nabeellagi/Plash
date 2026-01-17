@@ -29,8 +29,7 @@ export function enemyEntity({
         k.pos(pos),
         k.anchor("center"),
         k.z(z),
-        k.area(),
-        k.body({ isStatic: true }),
+        k.body(),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 48, 48) }),
         "enemy",
         {

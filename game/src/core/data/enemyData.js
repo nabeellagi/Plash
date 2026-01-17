@@ -35,7 +35,7 @@ export const ENEMY_DATA = {
         hp: 2,
         damage: 9,
         scale: 0.05,
-        occurChance: 0.6,
+        occurChance: 0.9,
 
         ai(player) {
             return zigzagChase(player, {
@@ -51,7 +51,7 @@ export const ENEMY_DATA = {
         hp: 2,
         damage: 12,
         scale: 0.06, 
-        occurChance: 0.6,
+        occurChance: 0.9,
 
         ai(player){
             return spiralChase(player, {
