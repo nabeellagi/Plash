@@ -1,15 +1,15 @@
 import gsap from "gsap";
 import { k } from "../core/kaplay";
 
-let altKeyListenerAdded = false;
-if (!altKeyListenerAdded) {
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "Alt") {
-            e.preventDefault();
-        }
-    });
-    altKeyListenerAdded = true;
-}
+// let altKeyListenerAdded = false;
+// if (!altKeyListenerAdded) {
+//     window.addEventListener("keydown", (e) => {
+//         if (e.key === "Alt") {
+//             e.preventDefault();
+//         }
+//     });
+//     altKeyListenerAdded = true;
+// }
 
 export function playerEntity({
     pos = k.center(),
@@ -335,7 +335,13 @@ export function playerEntity({
     });
 
     // BAT AIM
-    k.onKeyPress("alt", () => {
+    k.onKeyPress("/", () => {
+        batFlipped = !batFlipped;
+        batRoot.pos = batFlipped ? BAT_POS.flipped : BAT_POS.normal;
+        batRoot.scale.x = batFlipped ? -1 : 1;
+        batHitBox.angle = batFlipped ? 45 : -45;
+    });
+    k.onKeyPress("x", () => {
         batFlipped = !batFlipped;
         batRoot.pos = batFlipped ? BAT_POS.flipped : BAT_POS.normal;
         batRoot.scale.x = batFlipped ? -1 : 1;

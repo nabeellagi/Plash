@@ -17,6 +17,7 @@ export function registerBattle() {
         // k.debug.inspect = true;
 
         // ===== SET UP CONSTS AND VARS =====
+        let enemyList = []; // store enemy entity
         let gameState = "countdown";
         // LAYERING
         const Z_LAYER = {
@@ -81,13 +82,13 @@ export function registerBattle() {
 
         // ENEMY TEST
         const enemyTest = enemyEntity({
-            sprite: ENEMY_DATA.corn.sprite,
-            scale: ENEMY_DATA.corn.scale,
+            sprite: ENEMY_DATA.radish.sprite,
+            scale: ENEMY_DATA.radish.scale,
             z: Z_LAYER.player,
-            hp: ENEMY_DATA.corn.hp,
-            damage: ENEMY_DATA.corn.damage,
-            ai: ENEMY_DATA.corn.ai(player),
-            scale: ENEMY_DATA.corn.scale,
+            hp: ENEMY_DATA.radish.hp,
+            damage: ENEMY_DATA.radish.damage,
+            ai: ENEMY_DATA.radish.ai(player),
+            scale: ENEMY_DATA.radish.scale,
             pos: k.vec2(4, 4)
         })
 
@@ -161,6 +162,7 @@ export function registerBattle() {
         const camTarget = k.add([
             k.pos(player.pos)
         ]);
+        let camFocus = player;
         const CAM_FOLLOW_LERP = 0.08;
         const CAM_ZOOM_LERP = 0.06;
         const INIT_TARGET_ZOOM = 1.3;
@@ -168,7 +170,7 @@ export function registerBattle() {
         let currentZoom = 5
         // ==== CAM UPDATE ====
         k.onUpdate(() => {
-            camTarget.pos = camTarget.pos.lerp(player.pos, CAM_FOLLOW_LERP)
+            camTarget.pos = camTarget.pos.lerp(camFocus.pos, CAM_FOLLOW_LERP)
             k.camPos(camTarget.pos)
             currentZoom = k.lerp(currentZoom, targetZoom, CAM_ZOOM_LERP)
             k.camScale(currentZoom)
@@ -188,6 +190,14 @@ export function registerBattle() {
         k.onKeyDown("0", () => {
             targetZoom = INIT_TARGET_ZOOM;
         });
+
+        // === FOCUS ON BALL ====
+        k.onKeyDown("b", () => {
+            camFocus = ball;
+        });
+        k.onKeyRelease("b", () => {
+            camFocus = player;
+        })
 
         // SET HP BAR
         const maxHP = player.getHp();

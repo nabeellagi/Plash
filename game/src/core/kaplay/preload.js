@@ -22,7 +22,9 @@ const SPRITES = {
     melonball: 'sprites/melonball.png',
     chamber: 'sprites/chamber.png',
     onion: 'sprites/onion.png',
-    corn: 'sprites/corn.png'
+    corn: 'sprites/corn.png',
+    pumpkin: 'sprites/pumpkin.png',
+    radish : 'sprites/radish.png'
 };
 
 const FONTS = {
