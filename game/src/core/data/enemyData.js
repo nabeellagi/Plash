@@ -5,7 +5,7 @@ export const ENEMY_DATA = {
     onion: {
         sprite: "onion",
         hp: 1,
-        damage: 8,
+        damage: 7,
         scale: k.rand(1, 0.8),
         occurChance : 0.3,
 
@@ -17,7 +17,7 @@ export const ENEMY_DATA = {
     pumpkin: {
         sprite: "pumpkin",
         hp: 2,
-        damage: 12,
+        damage: 9,
         scale: 0.045,
         occurChance: 0.2,
 
@@ -33,7 +33,7 @@ export const ENEMY_DATA = {
     corn: {
         sprite: "corn",
         hp: 2,
-        damage: 15,
+        damage: 9,
         scale: 0.05,
         occurChance: 0.2,
 

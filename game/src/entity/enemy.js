@@ -9,9 +9,11 @@ export function enemyEntity({
     damage,
     hp,
     scale = 1,
+    scaleEntity = 1,
     z = 0,
     ai,
-    particleSprite
+    particleSprite,
+    color = k.rgb(255, 255, 255)
 }) {
 
     // SET UP
@@ -37,6 +39,7 @@ export function enemyEntity({
         k.anchor("center"),
         k.z(z),
         k.body(),
+        k.scale(scaleEntity),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 48, 48) }),
         "enemy",
         {
@@ -47,8 +50,14 @@ export function enemyEntity({
                 particle({
                     x: root.pos.x,
                     y: root.pos.y,
-                    sprite:particleSprite
+                    sprite: particleSprite
                 });
+
+                if (this.hp > 0) {
+                    k.play(sprite + "_hurt", {
+                        volume: 0.8
+                    });
+                }
 
                 this.hp -= amount
                 blink()
@@ -81,7 +90,7 @@ export function enemyEntity({
         k.scale(1),
         k.anchor("center"),
         k.scale(scale),
-        k.color(),
+        k.color(color),
     ])
 
     // ===== BLINK EFFECT =====
@@ -121,6 +130,10 @@ export function enemyEntity({
             ease: "back.in(2)",
             onComplete: () => root.destroy(),
         })
+
+        k.play(sprite + "_died", {
+            volume: 0.8
+        });
     }
 
     // ===== PLAYER COLLISION =====

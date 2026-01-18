@@ -191,7 +191,11 @@ export function playerEntity({
 
         sprite.use(k.sprite("aelswing"))
         sprite.scale.y = BASE_SCALE * 1.5
-        let initialAngle = batRoot.angle
+        let initialAngle = batRoot.angle;
+
+        k.play("whoosh", {
+            volume: 0.7
+        })
 
         gsap.to(batRoot, {
             angle: batFlipped ? 45 + 90 : -45 - 90,

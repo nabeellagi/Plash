@@ -14,8 +14,16 @@ export function registerBattle() {
     k.scene("battle", () => {
 
         // Debug
-        k.debug.inspect = true;
+        // k.debug.inspect = true;
 
+        // ==== SET MUSIC ====
+        const bgm = k.play("battle", {
+            volume: 0.4,
+            loop: true
+        });
+        k.onSceneLeave(() => {
+            bgm.stop();
+        })
         // ===== SET UP CONSTS AND VARS =====
         let enemyList = []; // store enemy entity
         let gameState = "countdown";

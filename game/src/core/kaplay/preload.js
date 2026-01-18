@@ -36,6 +36,30 @@ const FONTS = {
     Glad : 'fonts/GladlyAccept.ttf'
 };
 
+const SFX = {
+    corn_appear: 'sfx/corn_appear.wav',
+    corn_died: 'sfx/corn_died.wav',
+    corn_hurt: 'sfx/corn_hurt.wav',
+
+    onion_appear: 'sfx/onion_appear.wav',
+    onion_died: 'sfx/onion_died.wav',
+    onion_hurt: 'sfx/onion_hurt.wav',
+
+    pumpkin_appear: 'sfx/pumpkin_appear.wav',
+    pumpkin_died: 'sfx/pumpkin_died.wav',
+    pumpkin_hurt: 'sfx/pumpkin_hurt.wav',
+
+    radish_appear: 'sfx/radish_appear.wav',
+    radish_died: 'sfx/radish_died.wav',
+    radish_hurt: 'sfx/radish_hurt.wav',
+
+    whoosh : 'sfx/whoosh.wav'
+}
+
+const MUSICS = {
+    battle : 'musics/battle.ogg'
+}
+
 export function preloadAll(){
     // LOAD IMAGE
     for(const [key, value] of Object.entries(IMAGES)){
@@ -52,6 +76,12 @@ export function preloadAll(){
     }
     
     // LOAD SFX
+    for(const [key, value] of Object.entries(SFX)){
+        k.loadSound(key, value);
+    }
     
     // LOAD MUSIC
+    for(const [key, value] of Object.entries(MUSICS)){
+        k.loadSound(key, value);
+    }
 }

@@ -46,17 +46,26 @@ export function createWaveManager({
             BASE_MAX_ENEMY + (wave - 1) * MAX_ADD_PER_WAVE
 
         const penalty =
-            Math.floor((wave - 1) / 6) * 4
+            Math.floor((wave - 1) / 6) * 5
 
-        return Math.max(1, baseGrowth - penalty)
+        let max = Math.max(1, baseGrowth - penalty)
+
+        if (isBossWave()) {
+            // max = Math.max(1, Math.floor(max / 2))
+            return Math.max(1, Math.floor(max / 2));
+        }
+
+        return max
     }
-    
-    const getEnemyHpBonus = () =>
-        Math.floor((wave - 1) / 10)
 
-     const getEnemyAttackBonus = () =>
+
+    const getEnemyHpBonus = () =>
+        Math.floor((wave - 1) / 10) * 0.5
+
+    const getEnemyAttackBonus = () =>
         Math.floor((wave - 1) / 5)
 
+    const isBossWave = () => wave % 5 === 0
 
     // const getSpeedMultiplier = () =>
     //     BASE_SPEED_MULT +
@@ -75,14 +84,22 @@ export function createWaveManager({
     }
 
     function randomSpawnPos() {
-        const SAFE_RADIUS = 30;
-        let pos;
+        const SAFE_RADIUS = 120
+        let pos
+
+        let attempts = 0
+        const MAX_ATTEMPTS = 25
+
         do {
             pos = k.vec2(
                 k.rand(spawnBounds.left, spawnBounds.right),
                 k.rand(spawnBounds.top, spawnBounds.bottom)
             )
-        } while (pos.len() < SAFE_RADIUS)
+            attempts++
+        } while (
+            pos.dist(player.pos) < SAFE_RADIUS &&
+            attempts < MAX_ATTEMPTS
+        )
 
         return pos
     }
@@ -101,13 +118,18 @@ export function createWaveManager({
         const enemy = enemyEntity({
             sprite: data.sprite,
             hp: data.hp + hpBonus,
-            damage: data.damage + attackBonus,
+            damage: data.damage,
             scale: data.scale,
             ai: data.ai(player),
             z,
-            particleSprite: data.sprite+"Particle",
+            particleSprite: data.sprite + "Particle",
             pos: randomSpawnPos(),
-        })
+            // scaleEntity: 3,
+        });
+
+        k.play(data.sprite + "_appear", {
+            volume: 0.75
+        });
 
         enemy.onDestroy(() => {
             aliveEnemies--
@@ -116,6 +138,39 @@ export function createWaveManager({
 
             if (aliveEnemies === 0 && !spawning) {
                 k.wait(1, startNextWave)
+            }
+        })
+    };
+
+    function spawnBoss() {
+        const data = pickEnemyType()
+
+        aliveEnemies++
+
+        const boss = enemyEntity({
+            sprite: data.sprite,
+            hp: data.hp + 5,
+            damage: data.damage,
+            scale: data.scale,
+            scaleEntity: 3,
+            ai: data.ai(player),
+            z,
+            particleSprite: data.sprite + "Particle",
+            pos: randomSpawnPos(),
+            color: k.rgb(255, 215, 80),
+        })
+
+        k.play(data.sprite + "_appear", {
+            volume: 0.75
+        });
+
+        boss.onDestroy(() => {
+            aliveEnemies--
+            score += wave * 10
+            scoreText.text = `Score ${score}`
+
+            if (aliveEnemies === 0 && !spawning) {
+                k.wait(1.5, startNextWave)
             }
         })
     }
@@ -141,14 +196,22 @@ export function createWaveManager({
         wave++
 
         // ===== PLAYER REFILL =====
-        if (wave % 3 === 0) player.refillHp()
+        if (wave % 3 === 0) {
+            player.refillHp();
+        } else {
+            player.setHp(player.hp + 5)
+        }
 
         if (wave % 5 === 0) {
-            const newMax = player.getMaxHp() + 4
+            const newMax = player.getMaxHp() + 9
             player.setMaxHp(newMax, true) // true = refill
         }
 
         waveText.text = `Wave ${wave}`
+
+        if (isBossWave()) {
+            spawnBoss()
+        }
 
         const maxEnemies = getMaxEnemies()
         let remaining = maxEnemies
