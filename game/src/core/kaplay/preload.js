@@ -24,7 +24,11 @@ const SPRITES = {
     onion: 'sprites/onion.png',
     corn: 'sprites/corn.png',
     pumpkin: 'sprites/pumpkin.png',
-    radish : 'sprites/radish.png'
+    radish : 'sprites/radish.png',
+    onionParticle: 'sprites/onionParticle.png',
+    cornParticle: 'sprites/cornParticle.png',
+    pumpkinParticle: 'sprites/pumpkinParticle.png',
+    radishParticle: 'sprites/radishParticle.png',
 };
 
 const FONTS = {

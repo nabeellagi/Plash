@@ -5,9 +5,9 @@ export const ENEMY_DATA = {
     onion: {
         sprite: "onion",
         hp: 1,
-        damage: 5,
+        damage: 8,
         scale: k.rand(1, 0.8),
-        occurChance : 0.9,
+        occurChance : 0.3,
 
         ai(player) {
             return smoothChase(player, 100);
@@ -16,10 +16,10 @@ export const ENEMY_DATA = {
 
     pumpkin: {
         sprite: "pumpkin",
-        hp: 3,
-        damage: 10,
+        hp: 2,
+        damage: 12,
         scale: 0.045,
-        occurChance: 0.9,
+        occurChance: 0.2,
 
         ai(player) {
             return guardChase(player, {
@@ -33,9 +33,9 @@ export const ENEMY_DATA = {
     corn: {
         sprite: "corn",
         hp: 2,
-        damage: 9,
+        damage: 15,
         scale: 0.05,
-        occurChance: 0.9,
+        occurChance: 0.2,
 
         ai(player) {
             return zigzagChase(player, {
@@ -48,10 +48,10 @@ export const ENEMY_DATA = {
 
     radish: {
         sprite: "radish",
-        hp: 2,
+        hp: 3,
         damage: 12,
         scale: 0.06, 
-        occurChance: 0.9,
+        occurChance: 0.1,
 
         ai(player){
             return spiralChase(player, {

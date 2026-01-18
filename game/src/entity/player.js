@@ -41,6 +41,8 @@ export function playerEntity({
     let isInvincible = false;
     const HIT_COOLDOWN = 0.6;
 
+    let swingHitSet = new Set();
+
     // ==== SET ROOT =====
     const root = k.add([
         k.anchor("center"),
@@ -53,6 +55,7 @@ export function playerEntity({
             damage: (amount) => {
                 root.hp -= amount;
                 console.log("ouch")
+
             },
             getHp: () => root.hp,
             getMaxHp: () => root.maxHp,
@@ -112,6 +115,7 @@ export function playerEntity({
                 sprite.color = k.rgb(255, 100, 100);
                 console.log("damage")
                 // Blink
+                sprite.use(k.sprite("aelhurt"));
                 gsap.fromTo(sprite, {
                     opacity: 0.6
                 }, {
@@ -125,6 +129,7 @@ export function playerEntity({
                             isInvincible = false;
                             sprite.opacity = 1;
                             sprite.color = k.rgb(255, 255, 255);
+                            sprite.use(k.sprite("ael"));
                         });
                     }
                 });
@@ -179,13 +184,15 @@ export function playerEntity({
     let isSwinging = false;
 
     const batSwing = () => {
-        if (isSwinging) return;
-        isSwinging = true;
-        sprite.use(k.sprite("aelswing"));
-        sprite.scale.y = BASE_SCALE * 1.5;
-        let initialAngle = batRoot.angle;
+        if (isSwinging) return
 
-        // SWING ANIMATION
+        isSwinging = true
+        swingHitSet.clear();
+
+        sprite.use(k.sprite("aelswing"))
+        sprite.scale.y = BASE_SCALE * 1.5
+        let initialAngle = batRoot.angle
+
         gsap.to(batRoot, {
             angle: batFlipped ? 45 + 90 : -45 - 90,
             duration: 0.2,
@@ -195,14 +202,14 @@ export function playerEntity({
                     angle: initialAngle,
                     duration: 0.2,
                     onComplete: () => {
-                        isSwinging = false;
-                        sprite.use(k.sprite("ael"));
-                        sprite.scale.y = BASE_SCALE;
+                        isSwinging = false
+                        sprite.use(k.sprite("ael"))
+                        sprite.scale.y = BASE_SCALE
                     }
-                });
+                })
             }
-        });
-    };
+        })
+    }
 
     // Input for swing
     k.onKeyPress("z", batSwing);
@@ -210,7 +217,7 @@ export function playerEntity({
 
     // ==== BAT HIT DETECTION ====
     let currentPower = hitPower;
-    let addPower = 10;
+    let addPower = 1000;
     let numHit = 0;
 
     batHitBox.onCollide("ball", (b) => {
@@ -229,6 +236,88 @@ export function playerEntity({
             currentPower += addPower;
         }
     });
+
+    batHitBox.onCollide("enemy", (enemy) => {
+        if (!isSwinging) return
+        if (swingHitSet.has(enemy)) return
+
+        swingHitSet.add(enemy)
+
+        const knockDir = enemy.pos.sub(root.pos)
+
+        enemy.takeDamage?.(k.choose([0.5, 0.7, 1.2]))
+        enemy.knockDown?.(knockDir, 520, 0.45)
+
+        k.shake(6)
+    });
+
+    // ==== 4-WAY SHOOT ====
+    let canShoot = true
+    let activeShots = 0
+
+    const SHOT_LIFETIME = 3
+    const SHOT_SPEED = 420
+
+    function spawnBullet(dir) {
+        activeShots++
+        canShoot = false
+
+        const bullet = k.add([
+            k.sprite("melonball"),
+            k.pos(root.pos),
+            k.anchor("center"),
+            k.scale(0.3),
+            k.area({ shape: new k.Rect(k.vec2(0, 0), 60, 60) }),
+            k.body(),
+            k.z(root.z + 1),
+            "playerBullet",
+            {
+                dir: dir.unit(),
+            }
+        ])
+
+        bullet.onUpdate(() => {
+            bullet.move(bullet.dir.scale(SHOT_SPEED))
+        })
+
+        // Hit enemy
+        bullet.onCollide("enemy", (enemy) => {
+            enemy.takeDamage?.(k.rand(1,2))
+            bullet.destroy()
+        })
+
+        // Lifetime
+        k.wait(SHOT_LIFETIME, () => {
+            if (bullet.exists()) bullet.destroy()
+        })
+
+        bullet.onDestroy(() => {
+            activeShots--
+            if (activeShots <= 1) {
+                canShoot = true
+            }
+        })
+    };
+    k.onKeyPress("space", () => {
+        if (!canShoot) return
+
+        const dirs = [
+            k.vec2(1, 0),   // right
+            k.vec2(-1, 0),  // left
+            k.vec2(0, 1),   // down
+            k.vec2(0, -1),  // up
+
+            // diagonal
+            k.vec2(1, 1).unit(),    // down-right 
+            k.vec2(1, -1).unit(),   // up-right
+            k.vec2(-1, 1).unit(),   // down-left 
+            k.vec2(-1, -1).unit(),  // up-left 
+        ]
+
+        dirs.forEach(spawnBullet)
+        k.shake(8)
+    });
+
 
     // Which key pressed last will be the direction
     let lastVertical = 0;

@@ -41,12 +41,26 @@ export function createWaveManager({
     // =========================
     // HELPERS
     // =========================
-    const getMaxEnemies = () =>
-        BASE_MAX_ENEMY + (wave - 1) * MAX_ADD_PER_WAVE
+    const getMaxEnemies = () => {
+        const baseGrowth =
+            BASE_MAX_ENEMY + (wave - 1) * MAX_ADD_PER_WAVE
 
-    const getSpeedMultiplier = () =>
-        BASE_SPEED_MULT +
-        Math.floor((wave - 1) / SPEED_INCREASE_EVERY) * SPEED_MULT_STEP
+        const penalty =
+            Math.floor((wave - 1) / 6) * 4
+
+        return Math.max(1, baseGrowth - penalty)
+    }
+    
+    const getEnemyHpBonus = () =>
+        Math.floor((wave - 1) / 10)
+
+     const getEnemyAttackBonus = () =>
+        Math.floor((wave - 1) / 5)
+
+
+    // const getSpeedMultiplier = () =>
+    //     BASE_SPEED_MULT +
+    //     Math.floor((wave - 1) / SPEED_INCREASE_EVERY) * SPEED_MULT_STEP
 
     function pickEnemyType() {
         const pool = Object.values(ENEMY_DATA)
@@ -61,10 +75,16 @@ export function createWaveManager({
     }
 
     function randomSpawnPos() {
-        return k.vec2(
-            k.rand(spawnBounds.left, spawnBounds.right),
-            k.rand(spawnBounds.top, spawnBounds.bottom)
-        )
+        const SAFE_RADIUS = 30;
+        let pos;
+        do {
+            pos = k.vec2(
+                k.rand(spawnBounds.left, spawnBounds.right),
+                k.rand(spawnBounds.top, spawnBounds.bottom)
+            )
+        } while (pos.len() < SAFE_RADIUS)
+
+        return pos
     }
 
     // =========================
@@ -72,17 +92,20 @@ export function createWaveManager({
     // =========================
     function spawnEnemy() {
         const data = pickEnemyType()
-        const speedMult = getSpeedMultiplier()
+        // const speedMult = getSpeedMultiplier()
+        const hpBonus = getEnemyHpBonus();
+        const attackBonus = getEnemyAttackBonus();
 
         aliveEnemies++
 
         const enemy = enemyEntity({
             sprite: data.sprite,
-            hp: data.hp,
-            damage: data.damage,
+            hp: data.hp + hpBonus,
+            damage: data.damage + attackBonus,
             scale: data.scale,
             ai: data.ai(player),
             z,
+            particleSprite: data.sprite+"Particle",
             pos: randomSpawnPos(),
         })
 
@@ -118,7 +141,7 @@ export function createWaveManager({
         wave++
 
         // ===== PLAYER REFILL =====
-        player.refillHp()
+        if (wave % 3 === 0) player.refillHp()
 
         if (wave % 5 === 0) {
             const newMax = player.getMaxHp() + 4

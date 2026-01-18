@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { k } from "../core/kaplay";
+import { particle } from "../core/utils/particle";
 
 export function enemyEntity({
     pos = k.center(),
@@ -9,7 +10,8 @@ export function enemyEntity({
     hp,
     scale = 1,
     z = 0,
-    ai
+    ai,
+    particleSprite
 }) {
 
     // SET UP
@@ -25,6 +27,11 @@ export function enemyEntity({
     let isDead = false
     let isInvincible = false
 
+    let isKnockedDown = false
+    let knockDir = k.vec2(0, 0)
+    let knockSpeed = 0
+
+
     const root = k.add([
         k.pos(pos),
         k.anchor("center"),
@@ -34,15 +41,37 @@ export function enemyEntity({
         "enemy",
         {
             hp,
-            takeHit() {
+            takeDamage(amount = 1) {
                 if (isInvincible || isDead) return
 
-                this.hp--
+                particle({
+                    x: root.pos.x,
+                    y: root.pos.y,
+                    sprite:particleSprite
+                });
+
+                this.hp -= amount
                 blink()
 
                 if (this.hp <= 0) {
                     die()
                 }
+            },
+            knockDown(dir, force = 420, duration = 0.4) {
+                if (isDead || isKnockedDown) return
+
+                isKnockedDown = true
+                knockDir = dir.unit()
+                knockSpeed = force
+
+                spriteObj.angle = -45 * Math.sign(dir.x)
+                spriteObj.scale.y *= 0.9
+
+                k.wait(duration, () => {
+                    isKnockedDown = false
+                    spriteObj.angle = 0
+                    spriteObj.scale.y = scale
+                })
             },
         },
     ])
@@ -109,13 +138,22 @@ export function enemyEntity({
     // ===== BALL COLLISION =====
     root.onCollide("ball", (b) => {
         if (!b.isActive()) return
-        k.shake(3); 
-        root.takeHit()
+        k.shake(3);
+        root.takeDamage()
     })
 
     // ===== UPDATE =====
     root.onUpdate(() => {
         if (isDead) return
+
+        // ===== KNOCKDOWN PHYSICS =====
+        if (isKnockedDown) {
+            root.move(knockDir.scale(knockSpeed))
+            knockSpeed = k.lerp(knockSpeed, 0, 0.15)
+            return
+        }
+
+        // ===== NORMAL MOVEMENT =====
         const movement = root.pos.sub(lastPos)
         lastPos = root.pos.clone()
 
@@ -128,11 +166,7 @@ export function enemyEntity({
                 TILT.speed
             )
         } else {
-            currentTilt = k.lerp(
-                currentTilt,
-                0,
-                TILT.reset
-            )
+            currentTilt = k.lerp(currentTilt, 0, TILT.reset)
         }
 
         spriteObj.angle = currentTilt

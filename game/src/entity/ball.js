@@ -14,13 +14,24 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
     const MIN_SPEED = 5
     const SIZE = 32
 
+    const BOUNCE_DAMPING = 0.96
+    const MIN_BOUNCE_SPEED = 300;
+    function applyBounce(normal) {
+        direction = reflect(direction, normal)
+        direction = jitterDirection(direction, 1.5)
+
+        speed *= BOUNCE_DAMPING
+        speed = Math.max(speed, MIN_BOUNCE_SPEED)
+    }
+
+
     const root = k.add([
         k.anchor("center"),
         k.pos(pos),
         k.z(z || 0),
-        k.scale(1.2),
+        k.scale(1.7),
         k.rotate(0),
-        k.body({ isStatic : true }),
+        k.body({ isStatic: true }),
         k.area({ shape: new k.Rect(k.vec2(0, 0), 50, 50) }),
         "ball",
 
@@ -33,7 +44,7 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
                 isActive = true;
             },
 
-            isActive(){
+            isActive() {
                 return isActive;
             }
         }
@@ -61,33 +72,37 @@ export function ballEntity({ pos = k.center(), z, boundPadding }) {
         // LEFT
         if (root.pos.x < SIZE + boundPadding.left) {
             root.pos.x = SIZE + boundPadding.left
-            direction = reflect(direction, k.vec2(1, 0))
-            direction = jitterDirection(direction, 2);
+            // direction = reflect(direction, k.vec2(1, 0))
+            // direction = jitterDirection(direction, 2);
             spin += direction.y * 25
+            applyBounce(k.vec2(1, 0))
         }
 
         // RIGHT
         if (root.pos.x > k.width() + boundPadding.right) {
             root.pos.x = k.width() + boundPadding.right
-            direction = reflect(direction, k.vec2(-1, 0))
-            direction = jitterDirection(direction, 2);
+            // direction = reflect(direction, k.vec2(-1, 0))
+            // direction = jitterDirection(direction, 2);
             spin += direction.y * 25
+            applyBounce(k.vec2(-1, 0))
         }
 
         // TOP
         if (root.pos.y < SIZE + boundPadding.top) {
             root.pos.y = SIZE + boundPadding.top
-            direction = reflect(direction, k.vec2(0, 1));
-            direction = jitterDirection(direction, 2);
+            // direction = reflect(direction, k.vec2(0, 1));
+            // direction = jitterDirection(direction, 2);
             spin += direction.x * 25
+            applyBounce(k.vec2(0, 1))
         }
 
         // BOTTOM
         if (root.pos.y > k.height() - (SIZE + boundPadding.bottom)) {
             root.pos.y = k.height() - (SIZE + boundPadding.bottom)
-            direction = reflect(direction, k.vec2(0, -1));
-            direction = jitterDirection(direction, 2);
+            // direction = reflect(direction, k.vec2(0, -1));
+            // direction = jitterDirection(direction, 2);
             spin += direction.x * 25
+            applyBounce(k.vec2(0, -1))
         }
 
         speed -= DECELERATION * dt

@@ -72,7 +72,8 @@ export function registerBattle() {
             z: Z_LAYER.player,
             ball: ball,
             boundPadding: BOUND_PADDING,
-            canMove: canMove
+            canMove: canMove,
+            hitPower: 2000
         });
         player.setCanMove(false);
 
