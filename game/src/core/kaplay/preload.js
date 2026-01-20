@@ -57,7 +57,9 @@ const SFX = {
 }
 
 const MUSICS = {
-    battle : 'musics/battle.ogg'
+    battle : 'musics/battle.ogg',
+    anomaly : 'musics/anomaly.ogg',
+    fam: 'musics/fam.ogg'
 }
 
 export function preloadAll(){

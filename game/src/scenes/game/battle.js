@@ -6,9 +6,8 @@ import { hpBarUI } from "../../ui/hpBar";
 import { ballEntity } from "../../entity/ball";
 import { observerEntity } from "../../entity/observer";
 import { playerEntity } from "../../entity/player";
-import { enemyEntity } from "../../entity/enemy";
-import { ENEMY_DATA } from "../../core/data/enemyData";
 import { createWaveManager } from "../../core/utils/waveManager";
+import { showBattleScoreScreen } from "../../core/utils/ui/scoreScreen";
 
 export function registerBattle() {
     k.scene("battle", () => {
@@ -17,7 +16,7 @@ export function registerBattle() {
         // k.debug.inspect = true;
 
         // ==== SET MUSIC ====
-        const bgm = k.play("battle", {
+        const bgm = k.play(k.choose(["anomaly", "battle", "fam"]), {
             volume: 0.4,
             loop: true
         });
@@ -27,13 +26,17 @@ export function registerBattle() {
         // ===== SET UP CONSTS AND VARS =====
         let enemyList = []; // store enemy entity
         let gameState = "countdown";
+
+        const hour = new Date().getHours();
+        const isNightModeUnlocked = hour > 16;
         // LAYERING
         const Z_LAYER = {
             bg: 1,
             overlay: 3,
-            player: 5,
+            player: 6,
             obs: 2,
-            hpBar: 6
+            night: 5,
+            hpBar: 7
         };
 
         // PLAYER BOUND
@@ -153,6 +156,19 @@ export function registerBattle() {
         //     player.damage(10);
         // });
 
+        // ===== SET NIGHT MODE =====
+        let nightOverlay = null;
+        if (isNightModeUnlocked) {
+            nightOverlay = k.add([
+                k.rect(k.width(), k.height()),
+                k.color(0, 0, 0),
+                k.opacity(0.88),
+                k.pos(0, 0),
+                k.fixed(),
+                k.z(Z_LAYER.night),
+            ])
+        };
+
         // ==== SET CAM ====
         const camTarget = k.add([
             k.pos(player.pos)
@@ -244,7 +260,27 @@ export function registerBattle() {
                 top: -50,
                 bottom: k.height() + 50
             }
-        })
+        });
 
+        // ==== GAME OVER ====
+        let isGameOver = false
+        player.on("dead", () => {
+            if (isGameOver) return
+            isGameOver = true
+
+            console.log("GAME OVER")
+
+            player.setCanMove(false)
+
+            waveManager.stop()
+
+            k.wait(0.8, () => {
+                showBattleScoreScreen({
+                    wave: waveManager.getWave(),
+                    score: waveManager.getScore(),
+                })
+            })
+        })
     })
 };
+

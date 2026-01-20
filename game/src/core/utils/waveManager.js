@@ -12,6 +12,7 @@ export function createWaveManager({
     let score = 0
     let aliveEnemies = 0
     let spawning = false
+    let stopped = false
 
     const BASE_MAX_ENEMY = 3
     const MAX_ADD_PER_WAVE = 2
@@ -20,6 +21,9 @@ export function createWaveManager({
     const BASE_SPEED_MULT = 1
     const SPEED_INCREASE_EVERY = 5
     const SPEED_MULT_STEP = 0.15
+
+
+    let enemies = new Set()
 
     // =========================
     // UI
@@ -121,11 +125,13 @@ export function createWaveManager({
             damage: data.damage,
             scale: data.scale,
             ai: data.ai(player),
-            z,
+            z: 4,
             particleSprite: data.sprite + "Particle",
             pos: randomSpawnPos(),
             // scaleEntity: 3,
         });
+
+        enemies.add(enemy);
 
         k.play(data.sprite + "_appear", {
             volume: 0.75
@@ -154,11 +160,13 @@ export function createWaveManager({
             scale: data.scale,
             scaleEntity: 3,
             ai: data.ai(player),
-            z,
+            z: 4,
             particleSprite: data.sprite + "Particle",
             pos: randomSpawnPos(),
             color: k.rgb(255, 215, 80),
-        })
+        });
+
+        enemies.add(boss)
 
         k.play(data.sprite + "_appear", {
             volume: 0.75
@@ -176,6 +184,7 @@ export function createWaveManager({
     }
 
     function spawnBatch(count) {
+        if (stopped) return
         spawning = true
         let spawned = 0
 
@@ -193,6 +202,7 @@ export function createWaveManager({
     }
 
     function startNextWave() {
+        if (stopped) return
         wave++
 
         // ===== PLAYER REFILL =====
@@ -232,6 +242,18 @@ export function createWaveManager({
     return {
         start() {
             startNextWave()
+        },
+        stop() {
+            stopped = true;
+
+            enemies.forEach((enemy) => {
+                if (enemy.exists()) {
+                    enemy.destroy()
+                }
+            })
+
+            enemies.clear()
+            aliveEnemies = 0
         },
         getWave: () => wave,
         getScore: () => score,
