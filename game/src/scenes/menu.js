@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { Btn1 } from "../ui/btn";
 import { transitionClose } from "../core/kaplay/sceneTransition";
 
+let menubgm = null;
 export function registerMenu() {
     k.scene("menu", () => {
         // k.debug.inspect = true;
@@ -10,10 +11,10 @@ export function registerMenu() {
         let bgSprite = null;
         const hour = new Date().getHours();
 
-        if (hour >= 7 && hour < 18) {
-            bgSprite = "grass";
-        } else {
+        if (hour > 17) {
             bgSprite = "night";
+        } else {
+            bgSprite = "grass";
         }
         const grassBg = k.add([
             k.sprite(bgSprite),
@@ -46,23 +47,51 @@ export function registerMenu() {
             k.anchor("center")
         ]);
 
+        // ==== BGM ====
+        if (!menubgm) {
+            menubgm = k.play("morning", {
+                volume: 0.3,
+                loop: true
+            });
+        }
+        const stopBgm = () => {
+            if (menubgm) {
+                gsap.to(menubgm, {
+                    duration: 1.5,
+                    volume: 0,
+                    onComplete: () => menubgm.stop(),
+                    ease: "power2.out",
+                });
+                menubgm = null;
+            }
+        };
         // ==== UI ====
         const startBtn = Btn1({
             text: "Start",
-            pos: k.vec2(k.width() / 2 + 200, k.height() / 2 - 100),
-            onClick: () => transitionClose("battle", {
-                direction: "left",
-                duration: 0.7
-            })
+            pos: k.vec2(k.width() / 2 + 150, k.height() / 2 - 100),
+            onClick: () => {
+                transitionClose("battle", {
+                    direction: "left",
+                    duration: 0.7
+                })
+                stopBgm();
+            }
         });
 
+        const scoreBtn = Btn1({
+            text: "Score",
+            pos: k.vec2(k.width() / 2 + 350, k.height() / 2),
+            onClick: () => k.go('score')
+        });
         const tutorialBtn = Btn1({
             text: "Tutorial",
-            pos: k.vec2(k.width() / 2 + 200, k.height() / 2)
+            pos: k.vec2(k.width() / 2 + 150, k.height() / 2),
+            onClick: () => k.go('tutorial')
         });
         const creditsBtn = Btn1({
             text: "Credit",
-            pos: k.vec2(k.width() / 2 + 200, k.height() / 2 + 100)
+            pos: k.vec2(k.width() / 2 + 150, k.height() / 2 + 100),
+            onClick: () => k.go("credit")
         });
     });
 }

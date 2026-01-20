@@ -20,15 +20,20 @@ export function registerBattle() {
             volume: 0.4,
             loop: true
         });
+        const ambience = k.play("talk", {
+            volume: 0.25,
+            loop: true
+        });
         k.onSceneLeave(() => {
             bgm.stop();
+            ambience.stop();
         })
         // ===== SET UP CONSTS AND VARS =====
         let enemyList = []; // store enemy entity
         let gameState = "countdown";
 
         const hour = new Date().getHours();
-        const isNightModeUnlocked = hour > 16;
+        const isNightModeUnlocked = hour > 17;
         // LAYERING
         const Z_LAYER = {
             bg: 1,
@@ -280,7 +285,16 @@ export function registerBattle() {
                     score: waveManager.getScore(),
                 })
             })
+        });
+
+        k.onKeyPress("q", () => {
+            if (gameState !== "countdown") return
+            if (!nightOverlay) return
+
+            nightOverlay.destroy()
+            nightOverlay = null
         })
+
     })
 };
 

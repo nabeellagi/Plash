@@ -15,6 +15,7 @@ const SPRITES = {
     aelhurt : 'sprites/aelhurt.png',
     aellow : 'sprites/aellow.png',
     aelswing : 'sprites/aelswing.png',
+    nio: 'sprites/nio.png',
     nioobs : 'sprites/nioobs.png',
     bat : 'sprites/bat.png',
     cleanbrick : 'sprites/cleanbrick.png',
@@ -53,13 +54,24 @@ const SFX = {
     radish_died: 'sfx/radish_died.wav',
     radish_hurt: 'sfx/radish_hurt.wav',
 
-    whoosh : 'sfx/whoosh.wav'
+    whoosh : 'sfx/whoosh.wav',
+
+    talk : 'sfx/room.mp3',
+
+    tut1 : 'sfx/tut1.wav',
+    tut2 : 'sfx/tut2.wav',
+    tut3 : 'sfx/tut3.wav',
+    tut4 : 'sfx/tut4.wav',
+    tut5 : 'sfx/tut5.wav',
+    tut6 : 'sfx/tut6.wav',
+    tut7 : 'sfx/tut7.wav',
 }
 
 const MUSICS = {
     battle : 'musics/battle.ogg',
     anomaly : 'musics/anomaly.ogg',
-    fam: 'musics/fam.ogg'
+    fam: 'musics/fam.ogg',
+    morning: 'musics/morning.ogg'
 }
 
 export function preloadAll(){
